@@ -6,5 +6,17 @@
       <summary>Show "Latency" label</summary>
       <description>Whether to show the "Latency:" text before the ping value</description>
     </key>
+
+    <key name="latency-ip-wan" type="s">
+      <default>"8.8.8.8"</default>
+      <summary>IP WAN Address</summary>
+      <description>The IP WAN address for the ping</description>
+    </key>
+
+    <key name="latency-resolve-domain" type="s">
+      <default>"google.com"</default>
+      <summary>Resolve Domain</summary>
+      <description>The domain to resolve to detect DNS failures</description>
+    </key>
   </schema>
 </schemalist>

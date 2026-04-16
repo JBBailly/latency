@@ -14,7 +14,7 @@ A GNOME Shell extension that displays internet latency (ping) in the top panel. 
 
 Before building and installing this extension, make sure you have the following installed:
 
-- GNOME Shell (version 45, 46, or 47)
+- GNOME Shell (version 48, 49, or 50)
 - `glib-compile-schemas` (usually part of `glib2-devel` or `libglib2.0-dev` package)
 - `make` (for using the Makefile)
 - `ping` command

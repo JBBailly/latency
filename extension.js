@@ -89,11 +89,21 @@ export default class Latency extends Extension {
     }
 
     getCurrentLatency(refreshInterval) {
-        const scriptPath = `${this.path}/show-ping-time.sh`;
+        const scriptArgs = [`${this.path}/show-ping-time.sh`];
+
+        const ipWanAddress = this._settings.get_string('latency-ip-wan').trim();;
+        if (ipWanAddress.length > 0) {
+            scriptArgs.push("--ip", ipWanAddress);
+        }
+        
+        const resolveDomain = this._settings.get_string('latency-resolve-domain').trim();;
+        if (resolveDomain.length > 0) {
+            scriptArgs.push("--domain", resolveDomain);
+        }
 
         try {
             const proc = Gio.Subprocess.new(
-                [scriptPath],
+                scriptArgs,
                 Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_PIPE
             );
 
