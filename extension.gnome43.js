@@ -1,4 +1,4 @@
-/* extension.js
+/* extension.js - GNOME 43/44 compatible (legacy imports API)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,16 +16,11 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-import GObject from "gi://GObject";
-import GLib from "gi://GLib";
-import Gio from "gi://Gio";
-import Clutter from "gi://Clutter";
-import St from "gi://St";
-
-import * as Main from "resource:///org/gnome/shell/ui/main.js";
-import * as PanelMenu from "resource:///org/gnome/shell/ui/panelMenu.js";
-import * as PopupMenu from "resource:///org/gnome/shell/ui/popupMenu.js";
-import {Extension} from "resource:///org/gnome/shell/extensions/extension.js";
+const {GObject, GLib, Gio, Clutter, St} = imports.gi;
+const Main = imports.ui.main;
+const PanelMenu = imports.ui.panelMenu;
+const PopupMenu = imports.ui.popupMenu;
+const ExtensionUtils = imports.misc.extensionUtils;
 
 const refreshInterval = 5;
 
@@ -56,17 +51,21 @@ const Indicator = GObject.registerClass(
     }
 );
 
-export default class Latency extends Extension {
-    constructor(metadata) {
-        super(metadata);
+class Latency {
+    constructor() {
         this._indicator = null;
         this._timeout = null;
         this._settings = null;
+        this._extensionPath = null;
+        this._uuid = null;
         this._positionChangedId = null;
     }
 
     enable() {
-        this._settings = this.getSettings();
+        const extension = ExtensionUtils.getCurrentExtension();
+        this._extensionPath = extension.path;
+        this._uuid = extension.uuid;
+        this._settings = ExtensionUtils.getSettings();
 
         this._positionChangedId = this._settings.connect(
             'changed::latency-position', () => this._createIndicator()
@@ -107,12 +106,12 @@ export default class Latency extends Extension {
         const box = position === 'right' ? 'right' : 'left';
         const pos = position === 'right' ? 0 : 1;
 
-        this._indicator = new Indicator(() => this.openPreferences());
-        Main.panel.addToStatusArea(this.uuid, this._indicator, pos, box);
+        this._indicator = new Indicator(() => ExtensionUtils.openPrefs());
+        Main.panel.addToStatusArea(this._uuid, this._indicator, pos, box);
     }
 
     getCurrentLatency() {
-        const scriptArgs = [`${this.path}/show-ping-time.sh`];
+        const scriptArgs = [`${this._extensionPath}/show-ping-time.sh`];
 
         const ipWanAddress = this._settings.get_string('latency-ip-wan').trim();
         if (ipWanAddress.length > 0)
@@ -173,4 +172,8 @@ export default class Latency extends Extension {
             this._indicator.setText('Error');
         }
     }
+}
+
+function init() {
+    return new Latency();
 }

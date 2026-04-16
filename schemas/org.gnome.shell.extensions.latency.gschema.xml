@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
   <schema id="org.gnome.shell.extensions.latency" path="/org/gnome/shell/extensions/latency/">
+
     <key name="show-latency-label" type="b">
       <default>true</default>
       <summary>Show "Latency" label</summary>
@@ -18,5 +19,48 @@
       <summary>Resolve Domain</summary>
       <description>The domain to resolve to detect DNS failures</description>
     </key>
+
+    <key name="latency-position" type="s">
+      <choices>
+        <choice value="left"/>
+        <choice value="right"/>
+      </choices>
+      <default>'left'</default>
+      <summary>Panel position</summary>
+      <description>Position of the indicator in the panel: 'left' or 'right'</description>
+    </key>
+
+    <key name="latency-threshold-warning" type="i">
+      <default>100</default>
+      <range min="1" max="10000"/>
+      <summary>Warning threshold in milliseconds</summary>
+      <description>Latency above this value (ms) will be shown in yellow</description>
+    </key>
+
+    <key name="latency-threshold-critical" type="i">
+      <default>300</default>
+      <range min="1" max="10000"/>
+      <summary>Critical threshold in milliseconds</summary>
+      <description>Latency above this value (ms) will be shown in red</description>
+    </key>
+
+    <key name="latency-color-ok" type="s">
+      <default>'#ffffff'</default>
+      <summary>Color for normal latency</summary>
+      <description>Hex color shown when latency is below the warning threshold</description>
+    </key>
+
+    <key name="latency-color-warning" type="s">
+      <default>'#f5c211'</default>
+      <summary>Color for warning latency</summary>
+      <description>Hex color shown when latency is between warning and critical thresholds</description>
+    </key>
+
+    <key name="latency-color-critical" type="s">
+      <default>'#e01b24'</default>
+      <summary>Color for critical latency</summary>
+      <description>Hex color shown when latency is above the critical threshold</description>
+    </key>
+
   </schema>
 </schemalist>

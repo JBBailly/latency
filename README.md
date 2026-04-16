@@ -1,30 +1,42 @@
 # Latency - GNOME Shell Extension
 
-A GNOME Shell extension that displays internet latency (ping) in the top panel. It also shows when the internet connection is lost or if there is a DNS problem.
+A GNOME Shell extension that displays internet latency (ping) in the top panel. It also detects when the internet connection is lost or when there is a DNS problem.
 
 ## Features
 
-- Real-time latency display in the top panel
+- Real-time latency display in the top panel (updates every 5 seconds)
+- Color-coded indicator based on configurable thresholds (green / yellow / red)
+- Customizable colors for each state (normal, warning, critical)
+- Configurable panel position (left or right)
 - Configurable "Latency:" label (can be hidden to show only the ping value)
-- Automatic detection of connection issues
+- Automatic detection of connection loss
 - DNS problem detection
-- Uses Google's DNS (8.8.8.8) for reliable testing
+- Quick access to preferences by clicking the indicator
+- Customizable ping target IP and DNS resolve domain
+
+## GNOME Shell version support
+
+| GNOME version | Supported |
+|---|---|
+| 43, 44 | Yes |
+| 45, 46, 47, 48, 49, 50 | Yes |
 
 ## Prerequisites
 
 Before building and installing this extension, make sure you have the following installed:
 
-- GNOME Shell (version 48, 49, or 50)
-- `glib-compile-schemas` (usually part of `glib2-devel` or `libglib2.0-dev` package)
-- `make` (for using the Makefile)
-- `ping` command
-- `host` command (for DNS checking)
+- GNOME Shell 43 or later
+- `glib-compile-schemas` (part of `glib2-devel` or `libglib2.0-dev`)
+- `make`
+- `ping`
+- `host` (for DNS checking)
+- `python3` (used by the build system to generate distribution ZIPs)
 
-### Installing prerequisites on different distributions:
+### Installing prerequisites
 
 **Ubuntu/Debian:**
 ```bash
-sudo apt install glib2.0-dev make iputils-ping bind9-host
+sudo apt install libglib2.0-dev make iputils-ping bind9-host
 ```
 
 **Fedora/RHEL:**
@@ -37,116 +49,111 @@ sudo dnf install glib2-devel make iputils bind-utils
 sudo pacman -S glib2 make iputils bind
 ```
 
-## Building
+## Building and installing
 
-### Using Make (Recommended)
-
-1. Clone the repository:
 ```bash
 git clone https://github.com/mboscovich/latency.git
 cd latency
-```
-
-2. Build the extension:
-```bash
-make build
-```
-
-3. Install the extension:
-```bash
 make install
 ```
 
-### Manual Build
+`make install` automatically detects your GNOME Shell version and installs the appropriate files.
 
-If you prefer to build manually:
-
-1. Clone the repository:
-```bash
-git clone https://github.com/mboscovich/latency.git
-cd latency
-```
-
-2. Compile the GSettings schema:
-```bash
-glib-compile-schemas schemas/
-```
-
-3. Make the ping script executable:
-```bash
-chmod +x show-ping-time.sh
-```
-
-4. Copy the extension to your local extensions directory:
-```bash
-mkdir -p ~/.local/share/gnome-shell/extensions/latency@mboscovich.github.io/
-cp -r * ~/.local/share/gnome-shell/extensions/latency@mboscovich.github.io/
-```
-
-## Installation
-
-After building, you need to:
+After installing:
 
 1. **Restart GNOME Shell:**
-   - On X11: Press `Alt + F2`, type `r`, and press Enter
-   - On Wayland: Log out and log back in
+   - X11: `Alt + F2` → type `r` → Enter
+   - Wayland: log out and log back in
 
 2. **Enable the extension:**
-   - Using GNOME Extensions app
-   - Or via command line: `gnome-extensions enable latency@mboscovich.github.io`
+```bash
+gnome-extensions enable latency@mboscovich.github.io
+```
 
 ## Configuration
 
-The extension includes a preferences window where you can:
+Click the indicator in the panel to open a menu, then select **Preferences**.
 
-- **Show/Hide "Latency" Label**: Toggle whether to display the word "Latency:" before the ping value
-
-To access preferences:
-- Open GNOME Extensions app and click the settings icon for the Latency extension
+Alternatively:
+- Open the GNOME Extensions app and click the settings icon for Latency
 - Or run: `gnome-extensions prefs latency@mboscovich.github.io`
+
+### Display
+
+| Setting | Description |
+|---|---|
+| Show "Latency" Label | Toggle the `Latency:` prefix before the ping value |
+| Panel Position | Place the indicator on the **Left** or **Right** side of the panel |
+
+### Connection
+
+| Setting | Default | Description |
+|---|---|---|
+| IP WAN Address | `8.8.8.8` | IP used for the ping check |
+| Resolve Domain | `google.com` | Domain used for the DNS check |
+
+### Color thresholds
+
+| Setting | Default | Description |
+|---|---|---|
+| Warning threshold | `100` ms | Above this value the indicator turns the warning color |
+| Critical threshold | `300` ms | Above this value the indicator turns the critical color |
+
+### Colors
+
+| Setting | Default | Description |
+|---|---|---|
+| Normal color | White | Latency is below the warning threshold |
+| Warning color | Yellow | Latency is between warning and critical thresholds |
+| Critical color | Red | Latency is above the critical threshold |
+
+When the connection is lost or there is a DNS problem, the indicator reverts to the default panel text color.
 
 ## Usage
 
-Once installed and enabled, the extension will:
+Once installed and enabled, the extension shows in the panel and updates every 5 seconds:
 
-1. Display the current latency in the top panel (updates every 5 seconds)
-2. Show `[ No internet connection ]` when offline
-3. Show `[ DNS Problem ]` when there are DNS resolution issues
-4. Display the ping time in milliseconds (e.g., "29.4ms" or "Latency: 29.4ms")
+| Display | Meaning |
+|---|---|
+| `29.4ms` | Current latency (colored based on thresholds) |
+| `Latency: 29.4ms` | Same, with label prefix enabled |
+| `[ No internet connection ]` | Ping failed |
+| `[ DNS Problem ]` | Ping succeeded but DNS resolution failed |
 
-## Development
+## Makefile targets
 
-### Makefile Targets
-
-- `make build` - Compile schemas and prepare the extension
-- `make install` - Install the extension to the user directory
-- `make uninstall` - Remove the extension from the user directory
-- `make clean` - Clean build artifacts
-- `make help` - Show available targets
+| Target | Description |
+|---|---|
+| `make build` | Compile schemas and prepare the extension |
+| `make install` | Install for the current GNOME version (auto-detected) |
+| `make uninstall` | Remove the extension |
+| `make zip-gnome43` | Build ZIP for GNOME 43/44 (for extensions.gnome.org) |
+| `make zip-gnome45` | Build ZIP for GNOME 45+ (for extensions.gnome.org) |
+| `make zip-all` | Build both ZIPs |
+| `make clean` | Remove build artifacts and ZIPs |
+| `make check-deps` | Verify all required tools are installed |
 
 ## Troubleshooting
 
-### Schema compilation error
-If you get a schema-related error, make sure to compile the schemas:
+**Schema error on startup:**
 ```bash
 glib-compile-schemas schemas/
 ```
 
-### Permission denied on ping script
-Make sure the ping script is executable:
+**Permission denied on ping script:**
 ```bash
 chmod +x show-ping-time.sh
 ```
 
-### Extension not appearing
-1. Make sure GNOME Shell has been restarted
-2. Check if the extension is enabled: `gnome-extensions list --enabled`
+**Extension not appearing after install:**
+1. Restart GNOME Shell (see above)
+2. Check it is enabled: `gnome-extensions list --enabled`
 3. Check for errors: `journalctl -f -o cat /usr/bin/gnome-shell`
 
 ## License
 
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
+GNU General Public License v2.0 or later. See [LICENSE](LICENSE) for details.
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome. Feel free to open a Pull Request or an issue.
