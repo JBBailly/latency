@@ -125,6 +125,27 @@ function fillPreferencesWindow(window) {
     connectionGroup.add(resolveDomain);
     settings.bind('latency-resolve-domain', resolveDomain, 'text', Gio.SettingsBindFlags.DEFAULT);
 
+    const refreshIntervalRow = new Adw.ActionRow({
+        title: 'Refresh Interval (s)',
+        subtitle: 'How often to run the ping check',
+    });
+    const refreshSpinner = new Gtk.SpinButton({
+        adjustment: new Gtk.Adjustment({
+            lower: 1, upper: 3600, step_increment: 1, page_increment: 5,
+            value: settings.get_int('latency-refresh-interval'),
+        }),
+        valign: Gtk.Align.CENTER,
+        digits: 0,
+    });
+    refreshIntervalRow.add_suffix(refreshSpinner);
+    refreshSpinner.connect('value-changed', () => {
+        settings.set_int('latency-refresh-interval', refreshSpinner.get_value_as_int());
+    });
+    settings.connect('changed::latency-refresh-interval', () => {
+        refreshSpinner.value = settings.get_int('latency-refresh-interval');
+    });
+    connectionGroup.add(refreshIntervalRow);
+
     // ── Thresholds group ────────────────────────────────────────────────────
     // Adw.SpinRow requires libadwaita 1.4 (GNOME 45+).
     // Use Adw.ActionRow + Gtk.SpinButton for GNOME 43/44 compatibility.

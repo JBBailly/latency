@@ -22,8 +22,6 @@ const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 const ExtensionUtils = imports.misc.extensionUtils;
 
-const refreshInterval = 5;
-
 const Indicator = GObject.registerClass(
     class Indicator extends PanelMenu.Button {
         _init(openPrefsCallback) {
@@ -59,6 +57,7 @@ class Latency {
         this._extensionPath = null;
         this._uuid = null;
         this._positionChangedId = null;
+        this._intervalChangedId = null;
     }
 
     enable() {
@@ -70,21 +69,22 @@ class Latency {
         this._positionChangedId = this._settings.connect(
             'changed::latency-position', () => this._createIndicator()
         );
+        this._intervalChangedId = this._settings.connect(
+            'changed::latency-refresh-interval', () => this._restartTimer()
+        );
 
         this._createIndicator();
-
-        this._timeout = GLib.timeout_add_seconds(
-            GLib.PRIORITY_DEFAULT, refreshInterval, () => {
-                this.getCurrentLatency();
-                return GLib.SOURCE_CONTINUE;
-            }
-        );
+        this._restartTimer();
     }
 
     disable() {
         if (this._positionChangedId) {
             this._settings.disconnect(this._positionChangedId);
             this._positionChangedId = null;
+        }
+        if (this._intervalChangedId) {
+            this._settings.disconnect(this._intervalChangedId);
+            this._intervalChangedId = null;
         }
         if (this._timeout != null) {
             GLib.source_remove(this._timeout);
@@ -95,6 +95,21 @@ class Latency {
             this._indicator = null;
         }
         this._settings = null;
+    }
+
+    _restartTimer() {
+        if (this._timeout != null) {
+            GLib.source_remove(this._timeout);
+            this._timeout = null;
+        }
+        const interval = this._settings.get_int('latency-refresh-interval');
+        this.getCurrentLatency();
+        this._timeout = GLib.timeout_add_seconds(
+            GLib.PRIORITY_DEFAULT, interval, () => {
+                this.getCurrentLatency();
+                return GLib.SOURCE_CONTINUE;
+            }
+        );
     }
 
     _createIndicator() {

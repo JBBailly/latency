@@ -62,5 +62,12 @@
       <description>Hex color shown when latency is above the critical threshold</description>
     </key>
 
+    <key name="latency-refresh-interval" type="i">
+      <default>5</default>
+      <range min="1" max="3600"/>
+      <summary>Refresh interval in seconds</summary>
+      <description>How often to run the ping check (in seconds)</description>
+    </key>
+
   </schema>
 </schemalist>
