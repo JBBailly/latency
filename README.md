@@ -2,9 +2,15 @@
 
 A GNOME Shell extension that displays internet latency (ping) in the top panel. It also detects when the internet connection is lost or when there is a DNS problem.
 
+## Screenshots
+
+![Panel indicator showing latency in the top bar](screenshots/screenshot-1.png)
+
+![Preferences window with all available settings](screenshots/screenshot-2.png)
+
 ## Features
 
-- Real-time latency display in the top panel (updates every 5 seconds)
+- Real-time latency display in the top panel (configurable refresh interval, default 5 seconds)
 - Color-coded indicator based on configurable thresholds (green / yellow / red)
 - Customizable colors for each state (normal, warning, critical)
 - Configurable panel position (left or right)
@@ -91,6 +97,7 @@ Alternatively:
 |---|---|---|
 | IP WAN Address | `8.8.8.8` | IP used for the ping check |
 | Resolve Domain | `google.com` | Domain used for the DNS check |
+| Refresh Interval | `5` s | How often to run the ping check (1–3600 seconds) |
 
 ### Color thresholds
 
@@ -111,7 +118,7 @@ When the connection is lost or there is a DNS problem, the indicator reverts to 
 
 ## Usage
 
-Once installed and enabled, the extension shows in the panel and updates every 5 seconds:
+Once installed and enabled, the extension shows in the panel and updates at the configured interval (default 5 seconds):
 
 | Display | Meaning |
 |---|---|
