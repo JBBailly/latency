@@ -100,6 +100,22 @@ export default class LatencyPreferences extends ExtensionPreferences {
         connectionGroup.add(resolveDomain);
         settings.bind('latency-resolve-domain', resolveDomain, 'text', Gio.SettingsBindFlags.DEFAULT);
 
+        const refreshIntervalRow = new Adw.SpinRow({
+            title: _('Refresh Interval (s)'),
+            subtitle: _('How often to run the ping check'),
+            adjustment: new Gtk.Adjustment({
+                lower: 1, upper: 3600, step_increment: 1, page_increment: 5,
+            }),
+        });
+        refreshIntervalRow.value = settings.get_int('latency-refresh-interval');
+        refreshIntervalRow.connect('notify::value', () => {
+            settings.set_int('latency-refresh-interval', refreshIntervalRow.value);
+        });
+        settings.connect('changed::latency-refresh-interval', () => {
+            refreshIntervalRow.value = settings.get_int('latency-refresh-interval');
+        });
+        connectionGroup.add(refreshIntervalRow);
+
         // ── Thresholds group ────────────────────────────────────────────────
         const thresholdGroup = new Adw.PreferencesGroup({
             title: _('Color Thresholds'),

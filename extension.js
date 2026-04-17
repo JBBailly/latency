@@ -27,8 +27,6 @@ import * as PanelMenu from "resource:///org/gnome/shell/ui/panelMenu.js";
 import * as PopupMenu from "resource:///org/gnome/shell/ui/popupMenu.js";
 import {Extension} from "resource:///org/gnome/shell/extensions/extension.js";
 
-const refreshInterval = 5;
-
 const Indicator = GObject.registerClass(
     class Indicator extends PanelMenu.Button {
         _init(openPrefsCallback) {
@@ -63,6 +61,7 @@ export default class Latency extends Extension {
         this._timeout = null;
         this._settings = null;
         this._positionChangedId = null;
+        this._intervalChangedId = null;
     }
 
     enable() {
@@ -71,21 +70,22 @@ export default class Latency extends Extension {
         this._positionChangedId = this._settings.connect(
             'changed::latency-position', () => this._createIndicator()
         );
+        this._intervalChangedId = this._settings.connect(
+            'changed::latency-refresh-interval', () => this._restartTimer()
+        );
 
         this._createIndicator();
-
-        this._timeout = GLib.timeout_add_seconds(
-            GLib.PRIORITY_DEFAULT, refreshInterval, () => {
-                this.getCurrentLatency();
-                return GLib.SOURCE_CONTINUE;
-            }
-        );
+        this._restartTimer();
     }
 
     disable() {
         if (this._positionChangedId) {
             this._settings.disconnect(this._positionChangedId);
             this._positionChangedId = null;
+        }
+        if (this._intervalChangedId) {
+            this._settings.disconnect(this._intervalChangedId);
+            this._intervalChangedId = null;
         }
         if (this._timeout != null) {
             GLib.source_remove(this._timeout);
@@ -96,6 +96,21 @@ export default class Latency extends Extension {
             this._indicator = null;
         }
         this._settings = null;
+    }
+
+    _restartTimer() {
+        if (this._timeout != null) {
+            GLib.source_remove(this._timeout);
+            this._timeout = null;
+        }
+        const interval = this._settings.get_int('latency-refresh-interval');
+        this.getCurrentLatency();
+        this._timeout = GLib.timeout_add_seconds(
+            GLib.PRIORITY_DEFAULT, interval, () => {
+                this.getCurrentLatency();
+                return GLib.SOURCE_CONTINUE;
+            }
+        );
     }
 
     _createIndicator() {
